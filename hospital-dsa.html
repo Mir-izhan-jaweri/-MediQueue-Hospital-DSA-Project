@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediQueue — Hospital DSA System</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f7f6f2;--surface:#fff;--surface2:#f0efe9;--border:#e2e0d8;
+  --text:#1a1a18;--muted:#7a7868;
+  --accent:#1a6b4a;--accent-light:#e8f5ee;
+  --red:#c0392b;--red-light:#fdf0ee;
+  --orange:#d4600a;--orange-light:#fef3e8;
+  --blue:#1a4fa0;--blue-light:#eef3fc;
+  --purple:#5b3fa0;--purple-light:#f2effe;
+  --yellow:#b58a00;--yellow-light:#fefae8;
+}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh}
+nav{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:60px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-icon{width:34px;height:34px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:800}
+.brand-name{font-size:17px;font-weight:800}
+.brand-sub{font-size:11px;color:var(--muted);font-weight:500}
+.nav-tabs{display:flex;gap:4px}
+.nav-tab{padding:6px 14px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);transition:all .15s}
+.nav-tab.active,.nav-tab:hover{background:var(--accent-light);color:var(--accent)}
+.main{max-width:1200px;margin:0 auto;padding:24px}
+.section{display:none}.section.active{display:block}
+.hero-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:32px}
+.hero-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;cursor:pointer;transition:all .15s}
+.hero-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.hc-icon{font-size:28px;margin-bottom:10px}
+.hc-dsa{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.hc-title{font-size:15px;font-weight:700;margin-bottom:4px}
+.hc-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.sec-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.sec-title{font-size:22px;font-weight:800}
+.sec-dsa-badge{display:inline-flex;align-items:center;gap:6px;background:var(--purple-light);color:var(--purple);font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.panel-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.panel-head-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.panel-body{padding:18px}
+input,select,textarea{font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);width:100%;outline:none;transition:border-color .15s}
+input:focus,select:focus{border-color:var(--accent)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+label{font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px}
+.btn{padding:9px 18px;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all .15s}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#155a3d}
+.btn-danger{background:var(--red);color:#fff}.btn-danger:hover{background:#a0302a}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700}
+.badge-red{background:var(--red-light);color:var(--red)}
+.badge-orange{background:var(--orange-light);color:var(--orange)}
+.badge-green{background:var(--accent-light);color:var(--accent)}
+.badge-blue{background:var(--blue-light);color:var(--blue)}
+.badge-yellow{background:var(--yellow-light);color:var(--yellow)}
+.badge-purple{background:var(--purple-light);color:var(--purple)}
+.queue-table{width:100%;border-collapse:collapse}
+.queue-table th{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:8px 12px;border-bottom:1px solid var(--border);text-align:left}
+.queue-table td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+.queue-table tr:last-child td{border-bottom:none}
+.queue-table tr:hover td{background:var(--surface2)}
+.search-result{padding:14px;background:var(--accent-light);border:1px solid #b3ddc7;border-radius:8px;margin-top:12px;display:none}
+.search-not-found{padding:14px;background:var(--red-light);border:1px solid #f0c0bb;border-radius:8px;margin-top:12px;display:none}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:var(--surface2);border-radius:8px;padding:14px;text-align:center}
+.stat-num{font-size:26px;font-weight:800}
+.stat-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.code-box{background:#1a1a18;border-radius:8px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;color:#c8c4b4;overflow-x:auto;margin-top:12px}
+.ck{color:#c792ea}.cf{color:#82aaff}.cs{color:#c3e88d}.cc{color:#546e7a}.cn{color:#f78c6c}
+.algo-step{display:flex;align-items:flex-start;gap:12px;padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:13px;margin-bottom:6px}
+.step-num{width:22px;height:22px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .25s ease-out}
+@media(max-width:640px){.form-row{grid-template-columns:1fr}.nav-tabs{display:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="brand">
+      <div class="brand-icon">M</div>
+      <div><div class="brand-name">MediQueue</div><div class="brand-sub">Hospital DSA System</div></div>
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showTab('home')">🏠 Home</button>
+      <button class="nav-tab" onclick="showTab('queue')">🚨 Emergency Queue</button>
+      <button class="nav-tab" onclick="showTab('records')">🌳 Patient Records</button>
+      <button class="nav-tab" onclick="showTab('graph')">🗺️ Hospital Map</button>
+      <button class="nav-tab" onclick="showTab('appointments')">📅 Appointments</button>
+    </div>
+  </div>
+</nav>
+
+<div class="main">
+
+<!-- HOME -->
+<div id="sec-home" class="section active">
+  <div style="margin-bottom:28px">
+    <h1 style="font-size:28px;font-weight:800;margin-bottom:6px">Welcome to MediQueue 🏥</h1>
+    <p style="color:var(--muted);font-size:15px">Real-world hospital problems — Python DSA se solve kiye gaye</p>
+  </div>
+  <div class="hero-grid">
+    <div class="hero-card" onclick="showTab('queue')">
+      <div class="hc-icon">🚨</div>
+      <div class="hc-dsa">Priority Queue / Heap</div>
+      <div class="hc-title">Emergency Triage</div>
+      <div class="hc-desc">Critical patients pehle treat ho — severity ke basis par automatically sort hota hai. heapq use hota hai.</div>
+    </div>
+    <div class="hero-card" onclick="showTab('records')">
+      <div class="hc-icon">🌳</div>
+      <div class="hc-dsa">Binary Search Tree</div>
+      <div class="hc-title">Patient Records</div>
+      <div class="hc-desc">Lakhs mein se ek patient ki record O(log n) mein dhundho. BST insert, search, visualize.</div>
+    </div>
+    <div class="hero-card" onclick="showTab('graph')">
+      <div class="hc-icon">🗺️</div>
+      <div class="hc-dsa">Graph + BFS</div>
+      <div class="hc-title">Hospital Navigation</div>
+      <div class="hc-desc">Emergency mein shortest path — BFS algorithm se konsa rasta lena hai jaldi pohonchne ke liye.</div>
+    </div>
+    <div class="hero-card" onclick="showTab('appointments')">
+      <div class="hc-icon">📅</div>
+      <div class="hc-dsa">Stack (LIFO)</div>
+      <div class="hc-title">Appointment System</div>
+      <div class="hc-desc">Undo appointment, history track karo. Stack ka LIFO principle real-world mein kaise use hota hai.</div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><span class="panel-head-title">📊 Live Hospital Stats</span></div>
+    <div class="panel-body">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-num" id="stat-patients" style="color:var(--accent)">0</div><div class="stat-label">Total Patients</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-critical" style="color:var(--red)">0</div><div class="stat-label">Critical Cases</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-appointments" style="color:var(--blue)">0</div><div class="stat-label">Appointments</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:var(--purple)">4</div><div class="stat-label">DSA Algorithms</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:4px">
+        <div style="padding:14px;background:var(--accent-light);border-radius:10px;border-left:3px solid var(--accent)">
+          <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px">Priority Queue</div>
+          <div style="font-size:12px;color:var(--muted)">Insert: O(log n) &nbsp;|&nbsp; Get Min: O(1)</div>
+        </div>
+        <div style="padding:14px;background:var(--blue-light);border-radius:10px;border-left:3px solid var(--blue)">
+          <div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:4px">Binary Search Tree</div>
+          <div style="font-size:12px;color:var(--muted)">Search: O(log n) &nbsp;|&nbsp; Insert: O(log n)</div>
+        </div>
+        <div style="padding:14px;background:var(--purple-light);border-radius:10px;border-left:3px solid var(--purple)">
+          <div style="font-size:12px;font-weight:700;color:var(--purple);margin-bottom:4px">BFS Graph</div>
+          <div style="font-size:12px;color:var(--muted)">Shortest Path: O(V + E)</div>
+        </div>
+        <div style="padding:14px;background:var(--yellow-light);border-radius:10px;border-left:3px solid var(--yellow)">
+          <div style="font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:4px">Stack</div>
+          <div style="font-size:12px;color:var(--muted)">Push/Pop: O(1) &nbsp;|&nbsp; LIFO order</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EMERGENCY QUEUE -->
+<div id="sec-queue" class="section">
+  <div class="sec-header">
+    <div>
+      <div class="sec-title">🚨 Emergency Triage Queue</div>
+      <p style="color:var(--muted);font-size:13px;margin-top:4px">Severity jitni zyada, priority utni zyada — Min-Heap (heapq) use ho raha hai</p>
+    </div>
+    <span class="sec-dsa-badge">🐍 Python: heapq (Priority Queue)</span>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+    <div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-head-title">Naya Patient Register Karo</span></div>
+        <div class="panel-body">
+          <div class="form-row">
+            <div><label>Patient Name</label><input id="q-name" placeholder="Ali Hassan" /></div>
+            <div><label>Age</label><input id="q-age" type="number" placeholder="35" min="1" max="120"/></div>
+          </div>
+          <div style="margin-bottom:12px">
+            <label>Severity Level</label>
+            <select id="q-severity">
+              <option value="1">1 — Critical (Heart Attack, Stroke)</option>
+              <option value="2">2 — Emergency (Fracture, Accident)</option>
+              <option value="3">3 — Urgent (High Fever, Infection)</option>
+              <option value="4">4 — Semi-Urgent (Sprain, Mild Pain)</option>
+              <option value="5">5 — Non-Urgent (Cold, Minor Issue)</option>
+            </select>
+          </div>
+          <div style="margin-bottom:12px"><label>Complaint</label><input id="q-complaint" placeholder="Chest pain, breathing difficulty..."/></div>
+          <button class="btn btn-primary" onclick="addToQueue()" style="width:100%">➕ Queue Mein Add Karo</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-head-title">Python Code (heapq)</span></div>
+        <div class="panel-body">
+          <div class="code-box"><span class="ck">import</span> heapq
+
+<span class="cc"># Priority Queue = Min-Heap</span>
+queue = []
+
+<span class="ck">def</span> <span class="cf">add_patient</span>(severity, name):
+    heapq.heappush(queue, (severity, name))
+    <span class="cc"># O(log n)</span>
+
+<span class="ck">def</span> <span class="cf">treat_next</span>():
+    <span class="ck">if</span> queue:
+        severity, name = heapq.heappop(queue)
+        <span class="ck">return</span> name  <span class="cc"># Most critical first!</span>
+    <span class="cc"># O(log n) — heap rebalance hota hai</span>
+
+<span class="cc"># heappush: O(log n)</span>
+<span class="cc"># heappop:  O(log n)</span>
+<span class="cc"># Min peek: O(1) via queue[0]</span></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-head-title">Queue — <span id="queue-count">0</span> patients</span>
+          <button class="btn btn-danger" onclick="treatNext()" style="font-size:12px;padding:6px 12px">🏥 Next Treat Karo</button>
+        </div>
+        <div class="panel-body" id="queue-body" style="max-height:380px;overflow-y:auto">
+          <p style="color:var(--muted);font-size:13px;text-align:center;padding:20px">Queue empty — patient add karo</p>
+        </div>
+      </div>
+      <div id="treat-result" style="display:none" class="panel fade-in">
+        <div class="panel-head"><span class="panel-head-title">✅ Ab Treat Ho Raha Hai</span></div>
+        <div class="panel-body" id="treat-body"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PATIENT RECORDS BST -->
+<div id="sec-records" class="section">
+  <div class="sec-header">
+    <div>
+      <div class="sec-title">🌳 Patient Records — BST</div>
+      <p style="color:var(--muted);font-size:13px;margin-top:4px">Patient ID se O(log n) mein search — Binary Search Tree</p>
+    </div>
+    <span class="sec-dsa-badge">🐍 Python: Binary Search Tree</span>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:20px">
+    <div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-head-title">Patient Record Add Karo</span></div>
+        <div class="panel-body">
+          <div style="margin-bottom:12px"><label>Patient ID (number)</label><input id="bst-id" type="number" placeholder="1042" min="1"/></div>
+          <div class="form-row">
+            <div><label>Name</label><input id="bst-name" placeholder="Fatima Malik"/></div>
+            <div><label>Disease</label><input id="bst-disease" placeholder="Diabetes"/></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="bstInsert()" style="flex:1">➕ Insert</button>
+            <button class="btn btn-outline" onclick="bstClear()" style="flex:1">🗑️ Clear</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-head-title">Patient Search Karo</span></div>
+        <div class="panel-body">
+          <div style="display:flex;gap:8px">
+            <input id="bst-search" type="number" placeholder="Patient ID..." style="flex:1"/>
+            <button class="btn btn-primary" onclick="bstSearch()">🔍</button>
+          </div>
+          <div id="search-result" class="search-result"></div>
+          <div id="search-not-found" class="search-not-found"></div>
+          <div class="code-box"><span class="ck">class</span> <span class="cf">Node</span>:
+    <span class="ck">def</span> <span class="cf">__init__</span>(self, id, name):
+        self.id = id
+        self.name = name
+        self.left = <span class="ck">None</span>
+        self.right = <span class="ck">None</span>
+
+<span class="ck">def</span> <span class="cf">search</span>(root, id):
+    <span class="ck">if not</span> root <span class="ck">or</span> root.id == id:
+        <span class="ck">return</span> root
+    <span class="ck">if</span> id &lt; root.id:
+        <span class="ck">return</span> search(root.left, id)
+    <span class="ck">return</span> search(root.right, id)
+<span class="cc"># Time: O(log n) average</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-head-title">BST Visualization — Nodes par click karo</span></div>
+      <div class="panel-body">
+        <svg id="tree-svg" width="100%" height="320"></svg>
+        <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">Left = smaller ID &nbsp;|&nbsp; Right = larger ID</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GRAPH MAP -->
+<div id="sec-graph" class="section">
+  <div class="sec-header">
+    <div>
+      <div class="sec-title">🗺️ Hospital Navigation — BFS</div>
+      <p style="color:var(--muted);font-size:13px;margin-top:4px">Emergency mein shortest path — BFS algorithm use ho raha hai</p>
+    </div>
+    <span class="sec-dsa-badge">🐍 Python: Graph + BFS (deque)</span>
+  </div>
+  <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:20px">
+    <div class="panel">
+      <div class="panel-head"><span class="panel-head-title">Hospital Floor Map</span></div>
+      <div class="panel-body" style="padding:10px">
+        <canvas id="graph-canvas" style="width:100%;height:300px;border:1px solid var(--border);border-radius:8px"></canvas>
+        <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">Green path = BFS shortest route</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-head-title">Shortest Path Dhundo</span></div>
+        <div class="panel-body">
+          <div style="margin-bottom:12px">
+            <label>Kahan Se (From)</label>
+            <select id="g-from">
+              <option value="0">🚪 Main Entrance</option>
+              <option value="1">🅿️ Parking</option>
+              <option value="6">🛏️ Ward A</option>
+            </select>
+          </div>
+          <div style="margin-bottom:14px">
+            <label>Kahan Jana Hai (To)</label>
+            <select id="g-to">
+              <option value="3">🚑 Emergency Room</option>
+              <option value="4">💉 ICU</option>
+              <option value="5">🔬 Lab</option>
+              <option value="2">💊 Pharmacy</option>
+              <option value="7">🏥 OPD</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="findPath()" style="width:100%">🔍 BFS Path Nikalo</button>
+          <div id="path-result" style="margin-top:14px;display:none">
+            <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Shortest Path</div>
+            <div id="path-steps"></div>
+            <div id="path-dist" style="margin-top:10px;font-size:13px;font-weight:600;color:var(--accent)"></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-head-title">Python BFS Code</span></div>
+        <div class="panel-body">
+          <div class="code-box"><span class="ck">from</span> collections <span class="ck">import</span> deque
+
+<span class="ck">def</span> <span class="cf">bfs_path</span>(graph, start, end):
+    queue = deque([(start, [start])])
+    visited = {start}
+
+    <span class="ck">while</span> queue:
+        node, path = queue.popleft()
+        <span class="ck">if</span> node == end:
+            <span class="ck">return</span> path
+
+        <span class="ck">for</span> neighbor <span class="ck">in</span> graph[node]:
+            <span class="ck">if</span> neighbor <span class="ck">not in</span> visited:
+                visited.add(neighbor)
+                queue.append(
+                    (neighbor, path + [neighbor])
+                )
+<span class="cc"># Time: O(V + E)</span>
+<span class="cc"># Guaranteed shortest path!</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APPOINTMENTS STACK -->
+<div id="sec-appointments" class="section">
+  <div class="sec-header">
+    <div>
+      <div class="sec-title">📅 Appointment System — Stack</div>
+      <p style="color:var(--muted);font-size:13px;margin-top:4px">Stack se undo karo — Last In, First Out (LIFO)</p>
+    </div>
+    <span class="sec-dsa-badge">🐍 Python: Stack (list.append/pop)</span>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+    <div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-head-title">Appointment Book Karo</span></div>
+        <div class="panel-body">
+          <div class="form-row">
+            <div><label>Patient Name</label><input id="app-name" placeholder="Sara Ahmed"/></div>
+            <div><label>Doctor</label>
+              <select id="app-doctor">
+                <option>Dr. Ali (Cardiology)</option>
+                <option>Dr. Sara (Neurology)</option>
+                <option>Dr. Hassan (Orthopedics)</option>
+                <option>Dr. Zara (General)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div><label>Date</label><input id="app-date" type="date"/></div>
+            <div><label>Time</label><input id="app-time" type="time" value="09:00"/></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="bookAppointment()" style="flex:1">📅 Book Karo (Push)</button>
+            <button class="btn btn-danger" onclick="undoAppointment()" style="flex:1">↩️ Undo (Pop)</button>
+          </div>
+          <div id="undo-msg" style="margin-top:10px;font-size:13px;color:var(--red);display:none"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-head-title">Python Stack Code</span></div>
+        <div class="panel-body">
+          <div class="code-box"><span class="cc"># Python list as Stack</span>
+stack = []
+
+<span class="ck">def</span> <span class="cf">book</span>(patient, doctor, date):
+    appointment = {
+        <span class="cs">'patient'</span>: patient,
+        <span class="cs">'doctor'</span>: doctor,
+        <span class="cs">'date'</span>: date
+    }
+    stack.append(appointment)  <span class="cc"># PUSH O(1)</span>
+
+<span class="ck">def</span> <span class="cf">undo</span>():
+    <span class="ck">if</span> stack:
+        <span class="ck">return</span> stack.pop()  <span class="cc"># POP O(1)</span>
+
+<span class="cc"># LIFO = Last In, First Out</span>
+<span class="cc"># Last booked = first to undo!</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-head-title">Appointment Stack</span>
+        <span id="stack-size" class="badge badge-blue">0 items</span>
+      </div>
+      <div class="panel-body">
+        <div style="margin-bottom:12px;padding:10px;background:var(--surface2);border-radius:8px;font-size:12px;color:var(--muted);text-align:center">
+          ↑ TOP of Stack — yeh pehle undo hoga
+        </div>
+        <div id="appointments-list" style="display:flex;flex-direction:column;gap:8px;max-height:380px;overflow-y:auto">
+          <p style="color:var(--muted);font-size:13px;text-align:center;padding:20px">Stack empty — appointment book karo</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function showTab(tab) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-' + tab).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  const map = {home:'Home',queue:'Emergency',records:'Patient',graph:'Hospital',appointments:'Appointments'};
+  document.querySelectorAll('.nav-tab').forEach(t => { if (t.textContent.includes(map[tab])) t.classList.add('active'); });
+  if (tab === 'graph') setTimeout(drawGraph, 80);
+  updateStats();
+}
+
+// ==== PRIORITY QUEUE ====
+let pq = [];
+function addToQueue() {
+  const name = document.getElementById('q-name').value.trim();
+  const age = document.getElementById('q-age').value;
+  const severity = parseInt(document.getElementById('q-severity').value);
+  const complaint = document.getElementById('q-complaint').value.trim();
+  if (!name || !age) { alert('Name aur age zaroori hai!'); return; }
+  const labels = ['','Critical','Emergency','Urgent','Semi-Urgent','Non-Urgent'];
+  const colors = ['','badge-red','badge-orange','badge-yellow','badge-blue','badge-green'];
+  pq.push({name,age,severity,complaint,label:labels[severity],color:colors[severity],time:new Date().toLocaleTimeString()});
+  pq.sort((a,b) => a.severity - b.severity);
+  renderQueue();
+  document.getElementById('q-name').value='';
+  document.getElementById('q-age').value='';
+  document.getElementById('q-complaint').value='';
+  updateStats();
+}
+function renderQueue() {
+  const body = document.getElementById('queue-body');
+  document.getElementById('queue-count').textContent = pq.length;
+  if (!pq.length) { body.innerHTML='<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px">Queue empty</p>'; return; }
+  body.innerHTML = `<table class="queue-table"><thead><tr><th>Rank</th><th>Patient</th><th>Age</th><th>Severity</th><th>Complaint</th></tr></thead><tbody>` +
+    pq.map((p,i) => `<tr><td><strong style="font-size:15px;color:var(--accent)">${i+1}</strong></td><td><strong>${p.name}</strong></td><td>${p.age}</td><td><span class="badge ${p.color}">${p.label}</span></td><td style="font-size:12px;color:var(--muted)">${p.complaint||'—'}</td></tr>`).join('') +
+    `</tbody></table>`;
+}
+function treatNext() {
+  if (!pq.length) { alert('Queue empty hai!'); return; }
+  const p = pq.shift();
+  renderQueue();
+  const el = document.getElementById('treat-result');
+  el.style.display = 'block';
+  document.getElementById('treat-body').innerHTML = `<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><div style="width:48px;height:48px;background:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px">👨‍⚕️</div><div><div style="font-size:16px;font-weight:800">${p.name}</div><div style="font-size:13px;color:var(--muted)">Age: ${p.age} | Complaint: ${p.complaint||'N/A'}</div></div><span class="badge ${p.color}" style="margin-left:auto">${p.label}</span></div>`;
+  updateStats();
+}
+
+// ==== BST ====
+let bstRoot = null;
+class BSTNode { constructor(id,name,disease){this.id=id;this.name=name;this.disease=disease;this.left=null;this.right=null;} }
+function bstInsert() {
+  const id = parseInt(document.getElementById('bst-id').value);
+  const name = document.getElementById('bst-name').value.trim();
+  const disease = document.getElementById('bst-disease').value.trim();
+  if (!id||!name){alert('ID aur name zaroori!');return;}
+  bstRoot = bstIns(bstRoot, id, name, disease);
+  document.getElementById('bst-id').value='';
+  document.getElementById('bst-name').value='';
+  document.getElementById('bst-disease').value='';
+  drawBST(); updateStats();
+}
+function bstIns(root,id,name,disease){
+  if(!root) return new BSTNode(id,name,disease);
+  if(id<root.id) root.left=bstIns(root.left,id,name,disease);
+  else if(id>root.id) root.right=bstIns(root.right,id,name,disease);
+  return root;
+}
+function bstSearch() {
+  const id = parseInt(document.getElementById('bst-search').value);
+  const r=document.getElementById('search-result'), nf=document.getElementById('search-not-found');
+  r.style.display='none'; nf.style.display='none';
+  const node = bstFind(bstRoot, id);
+  if(node){ r.style.display='block'; r.innerHTML=`<strong>Patient Mil Gaya!</strong><br>ID: ${node.id} | Name: ${node.name} | Disease: ${node.disease||'N/A'}`; }
+  else { nf.style.display='block'; nf.innerHTML=`Patient ID ${id} nahi mila`; }
+}
+function bstFind(root,id){ if(!root) return null; if(root.id===id) return root; return id<root.id?bstFind(root.left,id):bstFind(root.right,id); }
+function bstClear(){ bstRoot=null; drawBST(); updateStats(); }
+function drawBST(){
+  const svg=document.getElementById('tree-svg');
+  svg.innerHTML='';
+  if(!bstRoot){svg.setAttribute('height','60');svg.innerHTML='<text x="200" y="35" font-family="Plus Jakarta Sans" font-size="13" fill="#7a7868" text-anchor="middle">Tree empty — patient add karo</text>';return;}
+  svg.setAttribute('viewBox','0 0 560 300');
+  function draw(node,x,y,spread){
+    if(!node)return;
+    if(node.left){const cx=x-spread,cy=y+70;svg.innerHTML+=`<line x1="${x}" y1="${y+20}" x2="${cx}" y2="${cy-20}" stroke="#c8c4b8" stroke-width="1.5"/>`;draw(node.left,cx,cy,spread/2);}
+    if(node.right){const cx=x+spread,cy=y+70;svg.innerHTML+=`<line x1="${x}" y1="${y+20}" x2="${cx}" y2="${cy-20}" stroke="#c8c4b8" stroke-width="1.5"/>`;draw(node.right,cx,cy,spread/2);}
+    svg.innerHTML+=`<circle cx="${x}" cy="${y}" r="20" fill="#e8f5ee" stroke="#1a6b4a" stroke-width="1.5" style="cursor:pointer" onclick="alert('ID: ${node.id}\\nName: ${node.name}\\nDisease: ${node.disease||'N/A'}')"/>
+    <text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Plus Jakarta Sans" font-size="11" font-weight="700" fill="#1a6b4a">${node.id}</text>`;
+  }
+  draw(bstRoot,280,30,110);
+}
+
+// ==== GRAPH BFS ====
+const ROOMS=[
+  {name:'Main Entrance',icon:'🚪',x:80,y:150},
+  {name:'Parking',icon:'🅿️',x:80,y:260},
+  {name:'Pharmacy',icon:'💊',x:210,y:260},
+  {name:'Emergency',icon:'🚑',x:210,y:70},
+  {name:'ICU',icon:'💉',x:340,y:70},
+  {name:'Lab',icon:'🔬',x:340,y:190},
+  {name:'Ward A',icon:'🛏️',x:470,y:70},
+  {name:'OPD',icon:'🏥',x:470,y:190},
+];
+const EDGES=[[0,1],[0,2],[0,3],[1,2],[2,5],[3,4],[3,5],[4,5],[4,6],[5,7],[6,7]];
+let highlightPath=[];
+function bfsPath(start,end){
+  const q=[[start]]; const vis=new Set([start]);
+  while(q.length){const path=q.shift();const node=path[path.length-1];if(node===end)return path;for(const[a,b]of EDGES){let next=-1;if(a===node)next=b;if(b===node)next=a;if(next!==-1&&!vis.has(next)){vis.add(next);q.push([...path,next]);}}}
+  return[];
+}
+function drawGraph(){
+  const canvas=document.getElementById('graph-canvas');
+  if(!canvas) return;
+  const W=canvas.offsetWidth||500, H=300;
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  const sx=W/580, sy=H/330;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#f0efe9'; ctx.fillRect(0,0,W,H);
+  const isInPath=(a,b)=>{for(let i=0;i<highlightPath.length-1;i++){if((highlightPath[i]===a&&highlightPath[i+1]===b)||(highlightPath[i]===b&&highlightPath[i+1]===a))return true;}return false;};
+  for(const[a,b]of EDGES){ctx.beginPath();ctx.moveTo(ROOMS[a].x*sx,ROOMS[a].y*sy);ctx.lineTo(ROOMS[b].x*sx,ROOMS[b].y*sy);if(isInPath(a,b)){ctx.strokeStyle='#1a6b4a';ctx.lineWidth=3;}else{ctx.strokeStyle='#c8c4b8';ctx.lineWidth=1.5;}ctx.stroke();}
+  for(let i=0;i<ROOMS.length;i++){
+    const r=ROOMS[i],ip=highlightPath.includes(i),cx=r.x*sx,cy=r.y*sy;
+    ctx.beginPath();ctx.arc(cx,cy,22,0,Math.PI*2);
+    ctx.fillStyle=ip?'#e8f5ee':'#fff';ctx.fill();
+    ctx.strokeStyle=ip?'#1a6b4a':'#c8c4b8';ctx.lineWidth=ip?2:1;ctx.stroke();
+    ctx.font='15px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#1a1a18';
+    ctx.fillText(r.icon,cx,cy-2);
+    ctx.font=`${ip?'bold ':''} 9px Plus Jakarta Sans`;
+    ctx.fillStyle=ip?'#1a6b4a':'#7a7868';
+    ctx.fillText(r.name.split(' ')[0],cx,cy+16);
+  }
+}
+function findPath(){
+  const from=parseInt(document.getElementById('g-from').value);
+  const to=parseInt(document.getElementById('g-to').value);
+  highlightPath=bfsPath(from,to);
+  drawGraph();
+  const res=document.getElementById('path-result');
+  res.style.display='block';
+  document.getElementById('path-steps').innerHTML=highlightPath.map((n,i)=>`<div class="algo-step"><span class="step-num">${i+1}</span><span>${ROOMS[n].icon} ${ROOMS[n].name}</span></div>`).join('');
+  document.getElementById('path-dist').textContent=`Total stops: ${highlightPath.length-1} | Nodes: ${highlightPath.length}`;
+}
+
+// ==== STACK ====
+let appStack=[];
+function bookAppointment(){
+  const name=document.getElementById('app-name').value.trim();
+  const doctor=document.getElementById('app-doctor').value;
+  const date=document.getElementById('app-date').value;
+  const time=document.getElementById('app-time').value;
+  if(!name||!date){alert('Name aur date zaroori!');return;}
+  appStack.push({name,doctor,date,time});
+  renderAppointments();
+  document.getElementById('app-name').value='';
+  document.getElementById('undo-msg').style.display='none';
+  updateStats();
+}
+function undoAppointment(){
+  if(!appStack.length){alert('Stack empty hai!');return;}
+  const removed=appStack.pop();
+  renderAppointments();
+  const msg=document.getElementById('undo-msg');
+  msg.style.display='block';
+  msg.textContent=`Undo: ${removed.name} ka appointment (${removed.doctor}) cancel ho gaya`;
+  updateStats();
+}
+function renderAppointments(){
+  const list=document.getElementById('appointments-list');
+  document.getElementById('stack-size').textContent=`${appStack.length} items`;
+  if(!appStack.length){list.innerHTML='<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px">Stack empty</p>';return;}
+  list.innerHTML=[...appStack].reverse().map((a,i)=>`
+    <div style="background:${i===0?'var(--accent-light)':'var(--surface2)'};border:1px solid ${i===0?'#b3ddc7':'var(--border)'};border-radius:8px;padding:12px;${i===0?'border-left:3px solid var(--accent)':''}">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <strong>${a.name}</strong>${i===0?'<span class="badge badge-green">TOP</span>':''}
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">${a.doctor} | ${a.date} at ${a.time}</div>
+    </div>`).join('');
+}
+
+function updateStats(){
+  let bc=0; function cb(n){if(!n)return;bc++;cb(n.left);cb(n.right);}cb(bstRoot);
+  document.getElementById('stat-patients').textContent=pq.length+bc+appStack.length;
+  document.getElementById('stat-critical').textContent=pq.filter(p=>p.severity===1).length;
+  document.getElementById('stat-appointments').textContent=appStack.length;
+}
+
+// INIT with sample data
+window.addEventListener('load',()=>{
+  document.getElementById('app-date').valueAsDate=new Date();
+  // BST sample
+  [[1042,'Ali Hassan','Diabetes'],[756,'Sara Malik','Fracture'],[1500,'Ahmed Khan','Fever'],[500,'Zara Ali','BP'],[900,'Umar Sheikh','Asthma']].forEach(([id,n,d])=>{bstRoot=bstIns(bstRoot,id,n,d);});
+  drawBST();
+  // Queue sample
+  document.getElementById('q-name').value='Imran Ahmed';document.getElementById('q-age').value=45;document.getElementById('q-severity').value=1;document.getElementById('q-complaint').value='Chest Pain';addToQueue();
+  document.getElementById('q-name').value='Aisha Bibi';document.getElementById('q-age').value=32;document.getElementById('q-severity').value=3;document.getElementById('q-complaint').value='High Fever';addToQueue();
+  document.getElementById('q-name').value='Tariq Mehmood';document.getElementById('q-age').value=60;document.getElementById('q-severity').value=2;document.getElementById('q-complaint').value='Road Accident';addToQueue();
+  // Stack sample
+  document.getElementById('app-name').value='Sana Mir';document.getElementById('app-doctor').value='Dr. Ali (Cardiology)';document.getElementById('app-date').value='2025-06-15';document.getElementById('app-time').value='10:00';bookAppointment();
+  document.getElementById('app-name').value='Bilal Shah';document.getElementById('app-doctor').value='Dr. Sara (Neurology)';document.getElementById('app-date').value='2025-06-16';document.getElementById('app-time').value='14:00';bookAppointment();
+  updateStats();
+});
+</script>
+</body>
+</html>
